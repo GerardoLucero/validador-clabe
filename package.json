@@ -1,6 +1,6 @@
 {
   "name": "validador-clabe",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Validador, generador y extractor de información de CLABE (Clave Bancaria Estandarizada) interbancaria mexicana",
   "main": "dist/index.js",
