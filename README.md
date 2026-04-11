@@ -6,6 +6,7 @@
 <!-- BADGES-DONATIONS-END -->
 
 [![npm version](https://badge.fury.io/js/validador-clabe.svg)](https://badge.fury.io/js/validador-clabe)
+[![npm downloads](https://img.shields.io/npm/dm/validador-clabe.svg)](https://www.npmjs.com/package/validador-clabe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/GerardoLucero/validador-clabe/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/GerardoLucero/validador-clabe/actions)
 
