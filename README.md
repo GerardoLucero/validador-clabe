@@ -2,13 +2,10 @@
 
 Librería moderna para validar, generar y extraer información de CLABE (Clave Bancaria Estandarizada) interbancaria mexicana de 18 dígitos.
 
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-FF5E5B?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/gerardolucero)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/lucerorios0)
-[![GitHub Stars](https://img.shields.io/github/stars/GerardoLucero/validador-clabe?style=social)](https://github.com/GerardoLucero/validador-clabe)
 [![npm version](https://badge.fury.io/js/validador-clabe.svg)](https://badge.fury.io/js/validador-clabe)
 [![npm downloads](https://img.shields.io/npm/dm/validador-clabe.svg)](https://www.npmjs.com/package/validador-clabe)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/GerardoLucero/validador-clabe/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/GerardoLucero/validador-clabe/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/GerardoLucero/validador-clabe/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/GerardoLucero/validador-clabe/actions/workflows/ci-cd.yml)
 
 ## Features
 
@@ -167,6 +164,13 @@ Paso 3: (10 - (suma % 10)) % 10
 
 - [Banco de México — CLABE](https://www.banxico.org.mx/sistemas-de-pago/informacion-general/banco-de-mexico-servicios/clabe-cuenta-bancaria-estandarizada.html)
 
+## Apoyo
+
+Proyecto de código abierto mantenido en mi tiempo libre. Si te fue útil y quieres agradecerlo:
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-FF5E5B?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/gerardolucero)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=flat&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/lucerorios0)
+
 ## Licencia
 
-MIT © [Gerardo Lucero](https://github.com/GerardoLucero)
+MIT © [Gerardo Lucero](https://github.com/GerardoLucero), ver [LICENSE](LICENSE).
