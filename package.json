@@ -1,6 +1,6 @@
 {
   "name": "validador-clabe",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "Validador, generador y extractor de información de CLABE (Clave Bancaria Estandarizada) interbancaria mexicana",
   "main": "dist/index.js",
@@ -39,7 +39,7 @@
   ],
   "author": {
     "name": "Gerardo Lucero",
-    "email": "tu-email@ejemplo.com"
+    "email": "luceroriosg@gmail.com"
   },
   "license": "MIT",
   "repository": {
