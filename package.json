@@ -1,8 +1,8 @@
 {
   "name": "validador-clabe",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "Validador, generador y extractor de información de CLABE (Clave Bancaria Estandarizada) interbancaria mexicana",
+  "description": "Valida, genera y desarma CLABEs interbancarias mexicanas con el catálogo de participantes de SPEI de Banxico",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

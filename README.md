@@ -1,23 +1,18 @@
 # validador-clabe
 
-Librería moderna para validar, generar y extraer información de CLABE (Clave Bancaria Estandarizada) interbancaria mexicana de 18 dígitos.
+Valida, genera y desarma cuentas CLABE (Clave Bancaria Estandarizada) de 18 dígitos, con el catálogo de participantes de SPEI de Banco de México.
 
-[![npm version](https://badge.fury.io/js/validador-clabe.svg)](https://badge.fury.io/js/validador-clabe)
-[![npm downloads](https://img.shields.io/npm/dm/validador-clabe.svg)](https://www.npmjs.com/package/validador-clabe)
+[![npm](https://img.shields.io/npm/v/validador-clabe.svg)](https://www.npmjs.com/package/validador-clabe)
+[![CI](https://github.com/GerardoLucero/validador-clabe/actions/workflows/ci.yml/badge.svg)](https://github.com/GerardoLucero/validador-clabe/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/GerardoLucero/validador-clabe/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/GerardoLucero/validador-clabe/actions/workflows/ci-cd.yml)
 
-## Features
+- Revisa longitud, caracteres y dígito verificador.
+- Identifica el banco con el catálogo oficial de Banxico: 97 instituciones, incluidas fintech como Nu, Mercado Pago o Spin by OXXO.
+- Indica si el banco de la CLABE sigue participando en SPEI.
+- Genera CLABEs con su dígito verificador para datos de prueba.
+- Sin dependencias. Funciona con `import` y `require` en Node 20 o superior, con tipos de TypeScript.
 
-- **Validación completa** — verifica formato y dígito verificador
-- **Extracción de datos** — banco, plaza, cuenta, dígito verificador
-- **Generación de CLABE** — crea CLABEs válidas con dígito correcto
-- **Catálogo de bancos** — 80+ bancos mexicanos incluidos
-- **Formateo** — formatea CLABEs para mejor lectura
-- **Validación por lotes** — valida múltiples CLABEs
-- **TypeScript ready** — incluye definiciones de tipos
-- **Zero dependencies** — totalmente standalone
-- **Cobertura > 90%**
+¿Necesitas también buscar bancos por nombre o rechazar de entrada las CLABEs de bancos que ya no existen? Usa [mx-bancos](https://www.npmjs.com/package/mx-bancos), que trae el mismo catálogo.
 
 ## Instalación
 
@@ -25,144 +20,119 @@ Librería moderna para validar, generar y extraer información de CLABE (Clave B
 npm install validador-clabe
 ```
 
-## Uso
+## Validar
 
-```javascript
-// ES6 Modules
-import { validarCLABE, extraerInfo } from 'validador-clabe';
-
-// CommonJS
-const { validarCLABE, extraerInfo } = require('validador-clabe');
-```
-
-### Validar CLABE
-
-```javascript
+```js
 import { validarCLABE } from 'validador-clabe';
+// o: const { validarCLABE } = require('validador-clabe');
 
-const esValida = validarCLABE('012180001234567897');
-console.log(esValida); // true
-
-// Acepta espacios y guiones
-const conEspacios = validarCLABE('012 180 00123456789 7');
-console.log(conEspacios); // true
+validarCLABE('012180001234567899');    // true
+validarCLABE('012 180 00123456789 9'); // true, acepta espacios y guiones
+validarCLABE('012180001234567891');    // false, digito verificador incorrecto
 ```
 
-### Extraer información
+`validarCLABE` solo revisa la forma y el dígito verificador. No consulta si la cuenta existe.
 
-```javascript
+## Extraer información
+
+```js
 import { extraerInfo } from 'validador-clabe';
 
-const info = extraerInfo('012180001234567897');
-console.log(info);
-/*
-{
-  clabe: '012180001234567897',
-  codigoBanco: '012',
-  nombreBanco: 'BBVA México',
-  codigoPlaza: '180',
-  numeroCuenta: '00123456789',
-  digitoVerificador: '7',
-  esValida: true
-}
-*/
+extraerInfo('012180001234567899');
+// {
+//   clabe: '012180001234567899',
+//   codigoBanco: '012',
+//   nombreBanco: 'BBVA MEXICO',
+//   bancoVigente: true,
+//   codigoPlaza: '180',
+//   numeroCuenta: '00123456789',
+//   digitoVerificador: '9',
+//   esValida: true
+// }
 ```
 
-### Generar CLABE
+`bancoVigente` es `false` cuando el código de banco ya no aparece entre los participantes de SPEI. Por ejemplo, IXE (`032`) se fusionó con Banorte: `extraerInfo('032180000118359719')` da `esValida: true`, `bancoVigente: false` y `nombreBanco: 'Desconocido'`.
 
-```javascript
-import { generarCLABE } from 'validador-clabe';
+`extraerInfo` lanza un `Error` si la CLABE no tiene 18 dígitos o trae letras.
 
-const clabe = generarCLABE('012', '180', '00123456789');
-console.log(clabe);
-/*
-{
-  clabe: '012180001234567897',
-  codigoBanco: '012',
-  nombreBanco: 'BBVA México',
-  codigoPlaza: '180',
-  numeroCuenta: '00123456789',
-  digitoVerificador: '7',
-  clabeFormateada: '012 180 00123456789 7'
-}
-*/
+## Generar CLABEs de prueba
+
+```js
+import { generarCLABE, formatearCLABE } from 'validador-clabe';
+
+generarCLABE('012', '180', '00123456789');
+// {
+//   clabe: '012180001234567899',
+//   codigoBanco: '012',
+//   nombreBanco: 'BBVA MEXICO',
+//   codigoPlaza: '180',
+//   numeroCuenta: '00123456789',
+//   digitoVerificador: '9',
+//   clabeFormateada: '012 180 00123456789 9'
+// }
+
+formatearCLABE('012180001234567899'); // '012 180 00123456789 9'
 ```
 
-### Formatear CLABE
+## Validar varias
 
-```javascript
-import { formatearCLABE } from 'validador-clabe';
-
-const formateada = formatearCLABE('012180001234567897');
-console.log(formateada); // '012 180 00123456789 7'
-```
-
-### Validar múltiples CLABEs
-
-```javascript
+```js
 import { validarCLABEs } from 'validador-clabe';
 
-const clabes = ['012180001234567897', '012180001234567891', '002180001234567890'];
-const resultados = validarCLABEs(clabes);
-// Array con { index, clabe, valida, banco, info } por cada una
+validarCLABEs(['012180001234567899', '012180001234567891', 'abc']);
+// [
+//   { index: 0, clabe: '012180001234567899', valida: true,  banco: 'BBVA MEXICO', info: { … } },
+//   { index: 1, clabe: '012180001234567891', valida: false, banco: 'BBVA MEXICO', info: { … } },
+//   { index: 2, clabe: 'abc', valida: false, error: 'La CLABE debe tener 18 dígitos' }
+// ]
+```
+
+## Bancos
+
+```js
+import { buscarBanco, obtenerCatalogoBancos } from 'validador-clabe';
+
+buscarBanco('012');   // por codigo CLABE
+buscarBanco('40012'); // por clave SPEI
+// { codigo: '012', claveSpei: '40012', nombre: 'BBVA MEXICO', tipo: 'Banca múltiple' }
+
+obtenerCatalogoBancos(); // las 97 instituciones
 ```
 
 ## API
 
-| Función | Descripción |
-|---------|-------------|
-| `validarCLABE(clabe): boolean` | Valida si una CLABE es correcta |
-| `extraerInfo(clabe): Object` | Extrae información detallada de una CLABE |
-| `generarCLABE(banco, plaza, cuenta): Object` | Genera una CLABE válida con dígito verificador |
-| `formatearCLABE(clabe): string` | Formatea con espacios (`BBB PPP CCCCCCCCCCC V`) |
-| `obtenerCatalogoBancos(): Array` | Obtiene el catálogo completo de bancos |
-| `buscarBanco(codigo): Object\|null` | Busca un banco por su código |
-| `validarCLABEs(clabes): Array` | Valida múltiples CLABEs en lote |
+| Función | Devuelve |
+|---|---|
+| `validarCLABE(clabe)` | `true` si tiene 18 dígitos y el verificador es correcto |
+| `extraerInfo(clabe)` | Banco, plaza, cuenta, verificador, `esValida` y `bancoVigente` |
+| `generarCLABE(banco, plaza, cuenta)` | CLABE con verificador y sus partes |
+| `formatearCLABE(clabe)` | `'BBB PPP CCCCCCCCCCC V'` |
+| `validarCLABEs(clabes)` | Un resultado por CLABE |
+| `buscarBanco(codigo)` | Banco por código CLABE o clave SPEI, o `null` |
+| `obtenerCatalogoBancos()` | Todas las instituciones |
+| `infoCatalogo()` | Fuente, URL y fecha del catálogo |
 
 ## Estructura de la CLABE
 
 ```
-012 180 00123456789 7
-│   │   │           │
-│   │   │           └─ Dígito verificador (1 dígito)
+012 180 00123456789 9
+│   │   │           └─ Dígito verificador
 │   │   └───────────── Número de cuenta (11 dígitos)
-│   └───────────────── Código de plaza (3 dígitos)
-└───────────────────── Código del banco (3 dígitos)
+│   └───────────────── Plaza (3 dígitos)
+└───────────────────── Banco (3 dígitos)
 ```
 
-## Bancos principales
+El dígito verificador se calcula así: cada uno de los primeros 17 dígitos se multiplica por 3, 7, 1, 3, 7, 1…; se suman las unidades de cada producto, y el verificador es `(10 - suma % 10) % 10`.
 
-| Código | Banco |
-|--------|-------|
-| 002 | Banamex |
-| 012 | BBVA México |
-| 014 | Santander |
-| 021 | HSBC |
-| 030 | Bajío |
-| 036 | Inbursa |
-| 044 | Scotiabank |
-| 072 | Banorte |
-| 127 | Azteca |
-| 137 | Bancoppel |
+## Datos
 
-## Algoritmo del dígito verificador
+- **Fuente:** lista de instituciones que publica [Banco de México](https://www.banxico.org.mx/cep/) en su servicio de Comprobante Electrónico de Pago (CEP), es decir, los participantes de SPEI.
+- **Fecha del catálogo incluido:** 2026-11-19. Hoy son 97 instituciones.
+- **Actualización:** `node scripts/actualizar-catalogo.mjs AAAA-MM-DD` regenera `src/catalogo.js`.
 
-Módulo 10 con pesos [3, 7, 1]:
+## Cambios
 
-```
-Paso 1: Multiplicar cada dígito por su peso (3, 7, 1, 3, 7, 1, ...)
-Paso 2: Sumar todos los dígitos de los productos (solo el dígito de las unidades)
-Paso 3: (10 - (suma % 10)) % 10
-```
-
-## Notas importantes
-
-- La CLABE es el estándar mexicano para transferencias electrónicas (SPEI)
-- Esta librería **no** valida si la cuenta existe, solo valida formato y dígito
-
-## Referencias
-
-- [Banco de México — CLABE](https://www.banxico.org.mx/sistemas-de-pago/informacion-general/banco-de-mexico-servicios/clabe-cuenta-bancaria-estandarizada.html)
+Ver [CHANGELOG.md](CHANGELOG.md).
 
 ## Apoyo
 

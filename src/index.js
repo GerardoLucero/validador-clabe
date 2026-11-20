@@ -9,115 +9,13 @@
  * - V: Dígito verificador (1 dígito)
  * 
  * @author Gerardo Lucero
- * @version 1.0.0
  */
 
-// Catálogo de bancos mexicanos con sus códigos
-const BANCOS = {
-  '002': 'Banamex',
-  '006': 'Bancomext',
-  '009': 'Banobras',
-  '012': 'BBVA México',
-  '014': 'Santander',
-  '019': 'Banjercito',
-  '021': 'HSBC',
-  '030': 'Bajío',
-  '032': 'IXE',
-  '036': 'Inbursa',
-  '037': 'Interacciones',
-  '042': 'Mifel',
-  '044': 'Scotiabank',
-  '058': 'BanRegio',
-  '059': 'Invex',
-  '060': 'Bansi',
-  '062': 'Afirme',
-  '072': 'Banorte',
-  '102': 'The Royal Bank',
-  '103': 'American Express',
-  '106': 'Bank of America',
-  '108': 'Bank of Tokyo',
-  '110': 'JP Morgan',
-  '112': 'Bmonex',
-  '113': 'Ve Por Mas',
-  '116': 'ING',
-  '124': 'Deutsche',
-  '126': 'Credit Suisse',
-  '127': 'Azteca',
-  '128': 'Autofin',
-  '130': 'Barclays',
-  '131': 'Famsa',
-  '132': 'BMW',
-  '133': 'GE Money',
-  '134': 'Bank of New York',
-  '135': 'Liverpool',
-  '136': 'Intercam',
-  '137': 'Bancoppel',
-  '138': 'ABC Capital',
-  '139': 'UBS Bank',
-  '140': 'Consubanco',
-  '141': 'Volkswagen',
-  '143': 'CIBanco',
-  '145': 'BBase',
-  '147': 'Bankaool',
-  '148': 'PagaTodo',
-  '150': 'Inmobiliario',
-  '151': 'Donde',
-  '152': 'Bancrea',
-  '154': 'Banco Finterra',
-  '155': 'ICBC',
-  '156': 'Sabadell',
-  '157': 'Shinhan',
-  '158': 'Mizuho Bank',
-  '159': 'Bank of China',
-  '160': 'Banco S3',
-  '166': 'BanBajio',
-  '168': 'MUFG Bank',
-  '600': 'GBM',
-  '601': 'Monexcb',
-  '602': 'Masari',
-  '605': 'Value',
-  '606': 'Estructuradores',
-  '607': 'Tiber',
-  '608': 'Vector',
-  '610': 'B&B',
-  '614': 'Accival',
-  '615': 'Merrill Lynch',
-  '616': 'Finamex',
-  '617': 'Valmex',
-  '618': 'Unica',
-  '619': 'MAPFRE',
-  '620': 'Profuturo',
-  '621': 'CB Actinber',
-  '622': 'Activo',
-  '623': 'Skandia',
-  '626': 'Cbdeutsche',
-  '627': 'Zurich',
-  '628': 'Zurichvi',
-  '629': 'SU Casabolsa',
-  '630': 'CB Intercam',
-  '631': 'CI Bolsa',
-  '632': 'Bulltick CB',
-  '633': 'Sterling',
-  '634': 'Fincomun',
-  '636': 'HDI Seguros',
-  '637': 'Order',
-  '638': 'Akala',
-  '640': 'JP Morgan CB',
-  '642': 'Reforma',
-  '646': 'STP',
-  '647': 'Telecomm',
-  '648': 'Evercore',
-  '649': 'Skandia',
-  '651': 'Segmty',
-  '652': 'Asea',
-  '653': 'Kuspit',
-  '655': 'Sofiexpress',
-  '656': 'Unagra',
-  '659': 'ASP Integra OPC',
-  '670': 'Libertad',
-  '901': 'CLS',
-  '902': 'INDEVAL'
-};
+import catalogo from './catalogo.js';
+
+// Participantes de SPEI segun Banco de Mexico, por codigo CLABE de 3 digitos.
+const BANCOS = Object.fromEntries(catalogo.bancos.map((b) => [b.codigo, b]));
+
 
 /**
  * Calcula el dígito verificador de una CLABE
@@ -149,7 +47,7 @@ function calcularDigitoVerificador(clabeSinDigito) {
  * @returns {boolean} True si es válida
  */
 export function validarCLABE(clabe) {
-  if (!clabe) return false;
+  if (typeof clabe !== 'string') return false;
   
   // Limpiar espacios y guiones
   const clabeLimpia = clabe.replace(/[\s-]/g, '');
@@ -177,7 +75,7 @@ export function validarCLABE(clabe) {
  * @returns {Object} Información extraída
  */
 export function extraerInfo(clabe) {
-  if (!clabe) {
+  if (typeof clabe !== 'string' || !clabe) {
     throw new Error('La CLABE es requerida');
   }
   
@@ -197,12 +95,13 @@ export function extraerInfo(clabe) {
   const digitoVerificador = clabeLimpia.substring(17);
   
   const esValida = validarCLABE(clabeLimpia);
-  const nombreBanco = BANCOS[codigoBanco] || 'Desconocido';
+  const nombreBanco = BANCOS[codigoBanco]?.nombre ?? 'Desconocido';
   
   return {
     clabe: clabeLimpia,
     codigoBanco,
     nombreBanco,
+    bancoVigente: codigoBanco in BANCOS,
     codigoPlaza,
     numeroCuenta,
     digitoVerificador,
@@ -238,7 +137,7 @@ export function generarCLABE(codigoBanco, codigoPlaza, numeroCuenta) {
   return {
     clabe: clabeCompleta,
     codigoBanco,
-    nombreBanco: BANCOS[codigoBanco] || 'Desconocido',
+    nombreBanco: BANCOS[codigoBanco]?.nombre ?? 'Desconocido',
     codigoPlaza,
     numeroCuenta,
     digitoVerificador,
@@ -252,7 +151,7 @@ export function generarCLABE(codigoBanco, codigoPlaza, numeroCuenta) {
  * @returns {string} CLABE formateada
  */
 export function formatearCLABE(clabe) {
-  if (!clabe) {
+  if (typeof clabe !== 'string' || !clabe) {
     throw new Error('La CLABE es requerida');
   }
   
@@ -275,32 +174,25 @@ export function formatearCLABE(clabe) {
  * @returns {Object} Catálogo de bancos
  */
 export function obtenerCatalogoBancos() {
-  return Object.entries(BANCOS).map(([codigo, nombre]) => ({
-    codigo,
-    nombre
-  }));
+  return catalogo.bancos.map((b) => ({ ...b }));
 }
 
 /**
  * Busca un banco por código
- * @param {string} codigo - Código del banco (3 dígitos)
- * @returns {Object|null} Información del banco
+ * @param {string} codigo - Código CLABE de 3 dígitos ('012') o clave SPEI de 5 ('40012')
+ * @returns {Object|null} codigo, claveSpei, nombre y tipo
  */
 export function buscarBanco(codigo) {
-  if (!codigo || codigo.length !== 3) {
+  if (typeof codigo !== 'string' || !/^\d{3}(\d{2})?$/.test(codigo)) {
     return null;
   }
-  
-  const nombre = BANCOS[codigo];
-  
-  if (!nombre) {
-    return null;
+  if (codigo.length === 5) {
+    const banco = catalogo.bancos.find((b) => b.claveSpei === codigo);
+    return banco ? { ...banco } : null;
   }
   
-  return {
-    codigo,
-    nombre
-  };
+  const banco = BANCOS[codigo];
+  return banco ? { ...banco } : null;
 }
 
 /**
@@ -334,6 +226,14 @@ export function validarCLABEs(clabes) {
   });
 }
 
+/**
+ * Fuente, URL y fecha del catálogo de bancos incluido
+ * @returns {{fuente: string, url: string, fecha: string}}
+ */
+export function infoCatalogo() {
+  return { fuente: catalogo.fuente, url: catalogo.url, fecha: catalogo.fecha };
+}
+
 export default {
   validarCLABE,
   extraerInfo,
@@ -342,5 +242,6 @@ export default {
   calcularDigitoVerificador: (clabeSinDigito) => calcularDigitoVerificador(clabeSinDigito),
   obtenerCatalogoBancos,
   buscarBanco,
-  validarCLABEs
+  validarCLABEs,
+  infoCatalogo
 };
