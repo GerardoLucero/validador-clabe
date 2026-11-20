@@ -9,8 +9,12 @@ import {
   formatearCLABE,
   obtenerCatalogoBancos,
   buscarBanco,
-  validarCLABEs
+  validarCLABEs,
+  infoCatalogo
 } from './index.js';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import process from 'node:process';
 
 describe('Validador de CLABE', () => {
   
@@ -83,7 +87,7 @@ describe('Validador de CLABE', () => {
       
       expect(info.clabe).toBe('012180001234567899');
       expect(info.codigoBanco).toBe('012');
-      expect(info.nombreBanco).toBe('BBVA México');
+      expect(info.nombreBanco).toBe('BBVA MEXICO');
       expect(info.codigoPlaza).toBe('180');
       expect(info.numeroCuenta).toBe('00123456789');
       expect(info.digitoVerificador).toBe('9');
@@ -114,10 +118,10 @@ describe('Validador de CLABE', () => {
     
     it('debe extraer información de CLABEs de diferentes bancos', () => {
       const clabes = {
-        '002180001234567896': 'Banamex',
-        '014180001234567897': 'Santander',
+        '002180001234567896': 'BANAMEX',
+        '014180001234567897': 'SANTANDER',
         '021180001234567899': 'HSBC',
-        '072180001234567897': 'Banorte'
+        '072180001234567897': 'BANORTE'
       };
       
       Object.entries(clabes).forEach(([clabe, nombreEsperado]) => {
@@ -177,10 +181,10 @@ describe('Validador de CLABE', () => {
     
     it('debe incluir el nombre del banco', () => {
       const clabe = generarCLABE('012', '180', '00123456789');
-      expect(clabe.nombreBanco).toBe('BBVA México');
+      expect(clabe.nombreBanco).toBe('BBVA MEXICO');
       
       const clabe2 = generarCLABE('002', '180', '00123456789');
-      expect(clabe2.nombreBanco).toBe('Banamex');
+      expect(clabe2.nombreBanco).toBe('BANAMEX');
     });
     
     it('debe formatear la CLABE con espacios', () => {
@@ -241,11 +245,11 @@ describe('Validador de CLABE', () => {
       const bancos = obtenerCatalogoBancos();
       const nombres = bancos.map(b => b.nombre);
       
-      expect(nombres).toContain('BBVA México');
-      expect(nombres).toContain('Banamex');
-      expect(nombres).toContain('Santander');
+      expect(nombres).toContain('BBVA MEXICO');
+      expect(nombres).toContain('BANAMEX');
+      expect(nombres).toContain('SANTANDER');
       expect(nombres).toContain('HSBC');
-      expect(nombres).toContain('Banorte');
+      expect(nombres).toContain('BANORTE');
     });
     
     it('debe incluir al menos 50 bancos', () => {
@@ -260,12 +264,12 @@ describe('Validador de CLABE', () => {
       
       expect(banco).not.toBeNull();
       expect(banco.codigo).toBe('012');
-      expect(banco.nombre).toBe('BBVA México');
+      expect(banco.nombre).toBe('BBVA MEXICO');
     });
     
     it('debe encontrar Banamex', () => {
       const banco = buscarBanco('002');
-      expect(banco.nombre).toBe('Banamex');
+      expect(banco.nombre).toBe('BANAMEX');
     });
     
     it('debe retornar null para código inexistente', () => {
@@ -277,6 +281,7 @@ describe('Validador de CLABE', () => {
       expect(buscarBanco('1')).toBeNull();
       expect(buscarBanco('12')).toBeNull();
       expect(buscarBanco('1234')).toBeNull();
+      expect(buscarBanco(12)).toBeNull();
       expect(buscarBanco(null)).toBeNull();
       expect(buscarBanco(undefined)).toBeNull();
     });
@@ -340,8 +345,8 @@ describe('Validador de CLABE', () => {
       const clabes = ['012180001234567899'];
       const resultados = validarCLABEs(clabes);
       
-      expect(resultados[0].banco).toBe('BBVA México');
-      expect(resultados[0].info.nombreBanco).toBe('BBVA México');
+      expect(resultados[0].banco).toBe('BBVA MEXICO');
+      expect(resultados[0].info.nombreBanco).toBe('BBVA MEXICO');
     });
     
     it('debe lanzar error si no es un array', () => {
@@ -394,7 +399,7 @@ describe('Validador de CLABE', () => {
       expect(info.codigoPlaza).toBe('180');
       expect(info.numeroCuenta).toBe('00123456789');
       expect(info.esValida).toBe(true);
-      expect(info.nombreBanco).toBe('BBVA México');
+      expect(info.nombreBanco).toBe('BBVA MEXICO');
       
       // Formatear
       const formateada = formatearCLABE(generada.clabe);
@@ -434,6 +439,59 @@ describe('Validador de CLABE', () => {
         );
         expect(clabe.digitoVerificador).toBe(caso.digitoEsperado);
       });
+    });
+  });
+
+  describe('Catalogo de Banxico', () => {
+    it('trae codigo, clave SPEI y tipo de cada participante de SPEI', () => {
+      const bancos = obtenerCatalogoBancos();
+      expect(new Set(bancos.map((b) => b.codigo)).size).toBe(bancos.length);
+      for (const b of bancos) {
+        expect(b.claveSpei.endsWith(b.codigo)).toBe(true);
+        expect(['Banca múltiple', 'Banca de desarrollo', 'Participante no bancario', 'Banco central']).toContain(b.tipo);
+      }
+    });
+
+    it('incluye instituciones nuevas', () => {
+      expect(buscarBanco('638').nombre).toBe('NUBANK');
+      expect(buscarBanco('728').nombre).toBe('SPIN BY OXXO');
+    });
+
+    it('busca por clave SPEI de 5 digitos', () => {
+      expect(buscarBanco('40012').codigo).toBe('012');
+      expect(buscarBanco('99999')).toBeNull();
+    });
+
+    it('devuelve copias', () => {
+      buscarBanco('012').nombre = 'X';
+      obtenerCatalogoBancos()[0].nombre = 'X';
+      expect(buscarBanco('012').nombre).toBe('BBVA MEXICO');
+    });
+
+    it('marca si el banco de la CLABE sigue en SPEI', () => {
+      // IXE (032) ya no participa en SPEI; el digito verificador sigue siendo correcto.
+      const ixe = extraerInfo('032180000118359719');
+      expect(ixe.esValida).toBe(true);
+      expect(ixe.bancoVigente).toBe(false);
+      expect(ixe.nombreBanco).toBe('Desconocido');
+      expect(extraerInfo('012180001234567899').bancoVigente).toBe(true);
+    });
+
+    it('expone fuente y fecha', () => {
+      expect(infoCatalogo().url).toContain('banxico.org.mx');
+      expect(infoCatalogo().fecha).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+
+    it('rechaza entradas que no son texto', () => {
+      expect(validarCLABE(12345)).toBe(false);
+      expect(() => extraerInfo(12345)).toThrow('requerida');
+      expect(() => formatearCLABE(12345)).toThrow('requerida');
+    });
+
+    it('el README usa la fecha y el total reales', () => {
+      const readme = readFileSync(join(process.cwd(), 'README.md'), 'utf8');
+      expect(readme).toContain(infoCatalogo().fecha);
+      expect(readme).toContain(`${obtenerCatalogoBancos().length} instituciones`);
     });
   });
 });
